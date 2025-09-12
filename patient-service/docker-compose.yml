@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   db:
@@ -18,6 +17,8 @@ services:
       - internal
 
   app:
+    build:
+      context: .
     image: patient-service
     container_name: patient-service-app
     depends_on:
@@ -31,8 +32,11 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SQL_INIT_MODE: always
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      BILLING_SERVICE_ADDRESS: billing-service
+      BILLING_SERVICE_GRPC_PORT: 9001
     networks:
       - internal
 
 networks:
-   internal:
+  internal:
+    external: true

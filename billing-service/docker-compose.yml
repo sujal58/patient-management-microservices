@@ -1,15 +1,16 @@
-version: "3.9"
+
 
 services:
-  app:
+  billing-service:
     build:
       context: .
     image: billing-service
     container_name: billing-service-app
     ports:
       - "8081:8081"
-      - "9090:9090"
+      - "9001:9001"
     networks:
       - internal
 networks:
     internal:
+      external: true
