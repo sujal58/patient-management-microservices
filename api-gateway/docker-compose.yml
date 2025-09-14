@@ -1,0 +1,15 @@
+services:
+  api-gateway:
+    build:
+      context: .
+    image: api-gateway:latest
+    container_name: api-gateway-application
+    ports:
+      - "4000:4000"
+
+    networks:
+      - internal
+
+networks:
+   internal:
+      external: true
