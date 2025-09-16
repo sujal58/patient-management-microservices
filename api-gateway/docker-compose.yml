@@ -7,6 +7,9 @@ services:
     ports:
       - "4000:4000"
 
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8084
+
     networks:
       - internal
 
