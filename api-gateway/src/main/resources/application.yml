@@ -19,6 +19,15 @@ spring:
               filters:
                 - StripPrefix=1
 
+            ## REST CLIENT -> http://localhost:4000/api-docs/auth-service
+            ## API GATEWAY -> http://auth-service:8084/swagger-ui/index.html
+            - id: auth-service-doc-route
+              uri: http://auth-service:8084
+              predicates:
+                - Path=/api-docs/auth
+              filters:
+                - RewritePath=/api-docs/auth,/v3/api-docs
+
 
             ## REST CLIENT -> http://localhost:4000/api/patients
             ## API GATEWAY -> http://patient-service:8080/
@@ -29,6 +38,7 @@ spring:
                 - Path=/api/patients/**
               filters:
                 - StripPrefix=1
+                - JwtValidation
 
             ## REST-CLIENT -> http://localhost:4000/api-docs/patients
             ## API-GATEWAY -> http://patient-service:8080/v3/api-docs
