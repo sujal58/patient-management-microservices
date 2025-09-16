@@ -33,8 +33,6 @@ services:
       SPRING_SQL_INIT_MODE: always
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - "8084:8084"
     networks:
       - internal
 
