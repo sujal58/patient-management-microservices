@@ -1,5 +1,6 @@
 package org.pm.authservice.service;
 
+import io.jsonwebtoken.JwtException;
 import org.pm.authservice.dto.LoginRequestDto;
 import org.pm.authservice.model.User;
 import org.pm.authservice.utils.JwtUtil;
@@ -28,5 +29,14 @@ public class AuthService {
                 .map(u -> jwtUtil.generateToken(u.getEmail(), u.getRole()));
 
         return token;
+    }
+
+    public Boolean validateToken(String token){
+        try {
+            jwtUtil.verifyToken(token);
+            return true;
+        }catch (JwtException e){
+            return false;
+        }
     }
 }
