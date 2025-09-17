@@ -1,0 +1,15 @@
+
+services:
+  billing-service:
+    build:
+      context: .
+    image: billing-service
+    container_name: billing-service-app
+    ports:
+      - "8081:8081"
+      - "9001:9001"
+    networks:
+      - internal
+networks:
+    internal:
+      external: true

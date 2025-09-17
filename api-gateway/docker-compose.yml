@@ -1,0 +1,18 @@
+services:
+  api-gateway:
+    build:
+      context: .
+    image: api-gateway:latest
+    container_name: api-gateway-application
+    ports:
+      - "4000:4000"
+
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8084
+
+    networks:
+      - internal
+
+networks:
+   internal:
+      external: true

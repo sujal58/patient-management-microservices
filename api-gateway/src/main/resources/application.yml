@@ -1,0 +1,61 @@
+server:
+  port: 4000
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            ##REST CLIENT ->  http://localhost:4000/auth/login
+            ## API GATEWAY -> http://auth-service:8084/login
+            - id: auth-service-route
+              uri: http://auth-service:8084
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
+
+            ## REST CLIENT -> http://localhost:4000/api-docs/auth-service
+            ## API GATEWAY -> http://auth-service:8084/swagger-ui/index.html
+            - id: auth-service-doc-route
+              uri: http://auth-service:8084
+              predicates:
+                - Path=/api-docs/auth
+              filters:
+                - RewritePath=/api-docs/auth,/v3/api-docs
+
+
+            ## REST CLIENT -> http://localhost:4000/api/patients
+            ## API GATEWAY -> http://patient-service:8080/
+            ## PATIENT SERVICE (SPRING BOOT APP) -> /patients -> PATIENT ARRAY
+            - id: patient-service-route
+              uri: http://patient-service:8080
+              predicates:
+                - Path=/api/patients/**
+              filters:
+                - StripPrefix=1
+                - JwtValidation
+
+            ## REST-CLIENT -> http://localhost:4000/api-docs/patients
+            ## API-GATEWAY -> http://patient-service:8080/v3/api-docs
+            - id: api-docs-patient-route
+              uri: http://patient-service:8080
+              predicates:
+                - Path=/api-docs/patients
+
+              filters:
+                - RewritePath=/api-docs/patients,/v3/api-docs
+
+            ## REST-CLIENT -> http://localhost:8084/api/analytics
+            ## API-GATEWAY -> http://analytics-service:8082/
+            - id: analytics-service-route
+              uri: http://analytics-service:8082
+              predicates:
+                - Path=/api/analytics/**
+
+              filters:
+                - StripPrefix=1

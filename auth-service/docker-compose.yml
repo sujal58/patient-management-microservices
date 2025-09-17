@@ -1,0 +1,41 @@
+
+services:
+  db:
+    image: postgres:latest
+    container_name: auth-service-db
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes:
+      - C:/Users/Asus/db_volumes/auth-service-db:/var/lib/postgresql/data
+
+    networks:
+      - internal
+
+
+  auth-service:
+    build:
+      context: .
+    image: auth-service:latest
+    container_name: auth-service-app
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-service-db:5432/db
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - internal
+
+networks:
+  internal:
+    external: true
