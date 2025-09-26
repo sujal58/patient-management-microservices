@@ -12,3 +12,18 @@ Authorization: Bearer {{token}}
 }
 
 ###
+
+### Dev mode
+POST http://localhost:8080/patients
+Content-Type: application/json
+#Authorization: Bearer {{token}}
+
+{
+  "name": "Sujal Pandey",
+  "email": "sujal@example.com",
+  "address": "123 main street",
+  "dateOfBirth": "1995-09-09",
+  "registeredDate": "2025-09-11"
+}
+
+###
