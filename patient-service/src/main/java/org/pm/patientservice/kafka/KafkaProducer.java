@@ -1,5 +1,6 @@
 package org.pm.patientservice.kafka;
 
+import org.pm.patientservice.enums.KafkaEvent;
 import org.pm.patientservice.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +19,12 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendEvent(Patient patient){
+    public void sendEvent(Patient patient, KafkaEvent eventType){
         PatientEvent event = PatientEvent.newBuilder()
                 .setPatientId(patient.getId().toString())
                 .setName(patient.getName())
                 .setEmail(patient.getEmail())
-                .setEventType("PATIENT_CREATED")
+                .setEventType(eventType.toString())
                 .build();
 
         try{
