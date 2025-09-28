@@ -4,6 +4,6 @@ Authorization: Bearer {{token}}
 ###
 
 ### GET request to get all patients (Dev)
-GET  http://localhost:8080/patients?page=1&size=5
+GET  http://localhost:8080/patients?page=0&size=20
 #Authorization: Bearer {{token}}
 ###

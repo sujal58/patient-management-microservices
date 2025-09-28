@@ -112,6 +112,7 @@ public class PatientService {
         return PatientMapper.toDto(updatedPatient);
     }
 
+    @Transactional
     public void deletePatient(UUID id){
         log.info("Deleting patient with ID: {}", id);
 

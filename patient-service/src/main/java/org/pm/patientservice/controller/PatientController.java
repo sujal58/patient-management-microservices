@@ -17,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -62,10 +64,12 @@ public class PatientController {
 
 
     @Operation(summary = "Delete a patient", description = "Delete a patient by ID")    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePatient(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> deletePatient(@PathVariable UUID id) {
         log.info("Received request to delete patient with ID: {}", id);
         patientService.deletePatient(id);
-        return ResponseEntity.noContent().build();
+        Map<String, String> message = new HashMap<>();
+        message.put("message", "Patient deleted successfully with id: " + id);
+        return ResponseEntity.status(200).body(message);
     }
 
 
