@@ -1,5 +1,6 @@
 package org.pm.patientservice.kafka;
 
+import jakarta.transaction.Transactional;
 import org.pm.patientservice.enums.KafkaEvent;
 import org.pm.patientservice.model.Patient;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import patient.events.PatientEvent;
 
 
 @Service
+@Transactional
 public class KafkaProducer {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaProducer.class);
@@ -24,13 +26,14 @@ public class KafkaProducer {
                 .setPatientId(patient.getId().toString())
                 .setName(patient.getName())
                 .setEmail(patient.getEmail())
+                .setDateOfBirth(patient.getDateOfBirth().toString())
                 .setEventType(eventType.toString())
                 .build();
 
         try{
             kafkaTemplate.send("patient", event.toByteArray());
         }catch(Exception e){
-            log.error("Error sending Patient created event: {}", event);
+            log.error("Error sending Patient created event: {}", event, e);
         }
     }
 
