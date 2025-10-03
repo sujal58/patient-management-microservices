@@ -5,18 +5,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
-import org.pm.patientservice.dto.PaginationResponse;
-import org.pm.patientservice.dto.PatientRequestDto;
-import org.pm.patientservice.dto.PatientResponseDto;
+import org.pm.patientservice.dto.*;
 import org.pm.patientservice.dto.validators.CreatePatientValidationGroup;
 import org.pm.patientservice.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +70,29 @@ public class PatientController {
         Map<String, String> message = new HashMap<>();
         message.put("message", "Patient deleted successfully with id: " + id);
         return ResponseEntity.status(200).body(message);
+    }
+
+    @PostMapping("/{patientId}/charges")
+    public ResponseEntity<BillResponseDto> addCharge(@PathVariable UUID patientId, @Valid @RequestBody AddChargeDto chargeDto) {
+        BillResponseDto bill = patientService.addCharge(patientId, chargeDto);
+        return ResponseEntity.ok(bill);
+    }
+
+    @GetMapping("/{patientId}/bills")
+    public ResponseEntity<List<BillResponseDto>> getBillsByPatient(
+            @PathVariable UUID patientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        List<BillResponseDto> bills = patientService.getBillsByPatient(patientId, page, size);
+        return ResponseEntity.ok(bills);
+    }
+
+    @GetMapping("/{patientId}/bills/{billDate}")
+    public ResponseEntity<BillResponseDto> getBillByPatientAndDate(
+            @PathVariable UUID patientId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate billDate) {
+        BillResponseDto bill = patientService.getBillByPatientAndDate(patientId, billDate);
+        return ResponseEntity.ok(bill);
     }
 
 
