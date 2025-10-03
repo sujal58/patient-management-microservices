@@ -2,3 +2,9 @@
 DELETE http://localhost:8080/patients/8ead7b8a-ee76-41bc-b493-d9ab820db230
 
 ###
+
+
+### Delete request to patient (Dev mode)
+DELETE http://localhost:8080/patients/40d04091-6553-4ddc-aaf4-fbe938a51d6c
+
+###

@@ -1,5 +1,9 @@
 ### GET request to get all patients
-GET  http://localhost:4000/api/patients
+GET  http://localhost:8080/api/patients
+Authorization: Bearer {{token}}
+###
+
+### GET request to get all patients (Dev)
+GET  http://localhost:8080/patients?page=0&size=20
 #Authorization: Bearer {{token}}
-Authorization: Bearer 124567890$%^&*()dgfhjkl
 ###

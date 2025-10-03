@@ -6,6 +6,7 @@ option java_package = "billing";
 
 service BillingService{
   rpc createBillingAccount(BillingRequest) returns (BillingResponse);
+  rpc DeactivateBillingAccount(DeactivateBillingRequest) returns (DeactivateBillingResponse);
 }
 
 message BillingRequest{
@@ -17,5 +18,14 @@ message BillingRequest{
 
 message  BillingResponse{
   string accountId = 1;
-  string status = 2;
+  string patientId= 2;
+  string status = 3;
+}
+
+message DeactivateBillingRequest {
+  string patient_id = 1;
+}
+
+message DeactivateBillingResponse {
+  string status = 1;
 }
