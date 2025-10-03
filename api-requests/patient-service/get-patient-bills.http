@@ -1,0 +1,4 @@
+### GET request to patient bills
+GET http://localhost:8080/patients/de4a6325-3908-42f7-ab8c-bf248991d551/bills
+
+###

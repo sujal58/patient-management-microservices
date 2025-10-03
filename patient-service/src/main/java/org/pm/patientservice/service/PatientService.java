@@ -1,9 +1,10 @@
 package org.pm.patientservice.service;
 
+import billing.*;
 import jakarta.transaction.Transactional;
-import org.pm.patientservice.dto.PaginationResponse;
-import org.pm.patientservice.dto.PatientRequestDto;
-import org.pm.patientservice.dto.PatientResponseDto;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import org.pm.patientservice.dto.*;
 import org.pm.patientservice.enums.KafkaEvent;
 import org.pm.patientservice.exception.BillingServiceException;
 import org.pm.patientservice.exception.EmailAlreadyExistsException;
@@ -19,10 +20,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientService {
@@ -31,14 +33,17 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
     private final KafkaProducer kafkaProducer;
+    private final Validator validator;
 
     public PatientService(
             PatientRepository patientRepository,
             BillingServiceGrpcClient billingServiceGrpcClient,
-            KafkaProducer kafkaProducer) {
+            KafkaProducer kafkaProducer,
+            Validator validator) {
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
         this.kafkaProducer = kafkaProducer;
+        this.validator = validator;
     }
 
     public PaginationResponse<PatientResponseDto> getPatients(int page, int size, String nameFilter){
@@ -135,6 +140,67 @@ public class PatientService {
             kafkaProducer.sendEvent( patient, KafkaEvent.PATIENT_DELETED);
         } catch (Exception e) {
             log.error("Failed to publish Kafka event for deleted patient ID: {}", id, e);
+        }
+    }
+
+    @Transactional
+    public BillResponseDto addCharge(UUID patientId, AddChargeDto chargeDto) {
+        log.info("Adding charge for patient ID: {}", patientId);
+        validateDto(chargeDto);
+
+        patientRepository.findById(patientId).orElseThrow(
+                () -> new PatientNotFoundException("Patient not found with ID: " + patientId));
+
+        BillResponse response = billingServiceGrpcClient.addCharge(patientId.toString(), chargeDto.getAmount(), chargeDto.getDescription(), chargeDto.getChargeDate());
+        return mapToBillResponseDto(response);
+    }
+
+    @Transactional
+    public List<BillResponseDto> getBillsByPatient(UUID patientId, int page, int size) {
+        log.info("Fetching bills for patient ID: {}", patientId);
+
+        patientRepository.findById(patientId).orElseThrow(
+                () -> new PatientNotFoundException("Patient not found with ID: " + patientId));
+
+        BillsResponse response = billingServiceGrpcClient.getBillsByPatient(patientId.toString(), page, size);
+        List<Charge> charge = response.getBillsList().stream().flatMap(bill-> bill.getChargesList().stream()).toList();
+        return response.getBillsList().stream().map(this::mapToBillResponseDto).collect(Collectors.toList());
+    }
+
+    public BillResponseDto getBillByPatientAndDate(UUID patientId, LocalDate billDate) {
+        log.info("Fetching bill for patient ID: {}, date: {}", patientId, billDate);
+
+        patientRepository.findById(patientId).orElseThrow(
+                () -> new PatientNotFoundException("Patient not found with ID: " + patientId));
+
+        BillResponse response = billingServiceGrpcClient.getBillByPatientAndDate(patientId.toString(), billDate);
+        return mapToBillResponseDto(response);
+    }
+
+    private BillResponseDto mapToBillResponseDto(BillResponse response) {
+        List<ChargeDto> charges = response.getChargesList().stream().map(charge -> new ChargeDto(
+                charge.getChargeId(),
+                charge.getAmount(),
+                charge.getDescription(),
+                LocalDate.parse(charge.getChargeDate())
+        )).collect(Collectors.toList());
+
+        return new BillResponseDto(
+                response.getBillId(),
+                response.getPatientId(),
+                LocalDate.parse(response.getBillDate()),
+                response.getTotalAmount(),
+                charges
+        );
+    }
+
+    private void validateDto(AddChargeDto dto) {
+        Set<ConstraintViolation<AddChargeDto>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            String errors = violations.stream()
+                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                    .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException("Validation failed: " + errors);
         }
     }
 }
