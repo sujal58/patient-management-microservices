@@ -1,0 +1,5 @@
+### GET request to fetch bill by patient and by date
+GET http://localhost:8080/patients/de4a6325-3908-42f7-ab8c-bf248991d551/bills/2025-09-30
+
+
+###
